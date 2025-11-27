@@ -13,16 +13,16 @@ export const registerCompany = async (req, res) => {
 
     const company = await Company.create({ name: companyName });
 
-    const owner = await User.create({
+    const superAdmin = await User.create({
       name,
       email,
       password,
-      role: "owner",
+      role: "super_admin",
       company: company._id,
     });
 
-    const accessToken = generateAccessToken(owner);
-    const refreshToken = generateRefreshToken(owner);
+    const accessToken = generateAccessToken(superAdmin);
+    const refreshToken = generateRefreshToken(superAdmin);
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
@@ -31,7 +31,7 @@ export const registerCompany = async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Company & Owner registered",
+      message: "Company & Super Admin registered",
       accessToken,
       user: owner,
       company,

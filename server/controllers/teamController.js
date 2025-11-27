@@ -1,9 +1,9 @@
 import Team from "../models/teamModel.js";
 import User from "../models/userModel.js";
 
-// CREATE TEAM (OWNER OR ADMIN)
+// CREATE TEAM (SUPER ADMIN OR ADMIN)
 export const createTeam = async (req, res) => {
-  const { name, teamLeaderId } = req.body;
+  const { name } = req.body;
   try {
     const companyId = req.user.company;
 
@@ -17,21 +17,10 @@ export const createTeam = async (req, res) => {
         .status(400)
         .json({ message: "A team with this name already exists for this company" });
 
-    let teamLeader = null;
-    if (teamLeaderId) {
-      const leader = await User.findById(teamLeaderId);
-      if (!leader)
-        return res.status(404).json({ message: "Team leader not found" });
-      if (leader.company.toString() !== companyId.toString())
-        return res.status(403).json({ message: "Team leader not in your company" });
-      teamLeader = leader._id;
-    }
-
     const team = await Team.create({
       name,
       company: companyId,
       admin: req.user._id,
-      teamLeader: teamLeader,
       members: [], // initialize empty array
     });
 
@@ -113,36 +102,6 @@ export const getMyTeams = async (req, res) => {
   }
 };
 
-// SET TEAM LEADER
-export const setTeamLeader = async (req, res) => {
-  const { teamId, leaderId } = req.body;
-
-  try {
-    const team = await Team.findById(teamId);
-    if (!team) return res.status(404).json({ message: "Team not found" });
-
-    if (team.company.toString() !== req.user.company.toString())
-      return res.status(403).json({ message: "Not allowed" });
-
-    // Only admin can set team leader
-    if (team.admin.toString() !== req.user._id.toString())
-      return res.status(403).json({ message: "Only team admin can set leader" });
-
-    if (leaderId) {
-      const leader = await User.findById(leaderId);
-      if (!leader) return res.status(404).json({ message: "Leader not found" });
-      if (leader.company.toString() !== req.user.company.toString())
-        return res.status(403).json({ message: "Leader not in company" });
-    }
-
-    team.teamLeader = leaderId || null;
-    await team.save();
-
-    return res.json({ message: "Team leader updated", team });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
 
 // GET MY TEAM (Employee Route)
 export const getMyTeam = async (req, res) => {

@@ -21,7 +21,7 @@ export const createEmployee = async (req, res) => {
     }
 
     // Permission check
-    if (finalRole === "owner" || (finalRole === "admin" && req.user.role !== "owner")) {
+    if (finalRole === "super_admin" || (finalRole === "admin" && req.user.role !== "super_admin")) {
       return res.status(403).json({ message: "Not authorized to create this role" });
     }
 

@@ -22,10 +22,10 @@ export const protect = async (req, res, next) => {
   }
 };
 
-// OWNER ONLY
-export const ownerOnly = (req, res, next) => {
-  if (req.user.role !== "owner")
-    return res.status(403).json({ message: "Owners only" });
+// SUPER ADMIN ONLY
+export const superAdminOnly = (req, res, next) => {
+  if (req.user.role !== "super_admin")
+    return res.status(403).json({ message: "Super Admins only" });
   next();
 };
 
@@ -36,16 +36,16 @@ export const adminOnly = (req, res, next) => {
   next();
 };
 
-// ADMIN OR OWNER
+// ADMIN OR SUPER ADMIN
 export const adminOrAbove = (req, res, next) => {
-  if (!["owner", "admin"].includes(req.user.role))
+  if (!["super_admin", "admin"].includes(req.user.role))
     return res.status(403).json({ message: "Admin or above required" });
   next();
 };
 
-// TEAM LEADER OR ABOVE
-export const teamLeaderOrAbove = (req, res, next) => {
-  if (!["owner", "admin", "team_leader"].includes(req.user.role))
-    return res.status(403).json({ message: "Team leader or above required" });
+// EMPLOYEE OR ABOVE
+export const employeeOrAbove = (req, res, next) => {
+  if (!["super_admin", "admin", "employee"].includes(req.user.role))
+    return res.status(403).json({ message: "Employee or above required" });
   next();
 };
