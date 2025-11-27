@@ -3,7 +3,7 @@ import User from "../models/userModel.js";
 // GET ALL USERS IN COMPANY
 export const getUsers = async (req, res) => {
   try {
-    const users = await User.find({ company: req.company }).select("-password");
+    const users = await User.find({ company: req.user.company }).select("-password");
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -14,9 +14,15 @@ export const getUsers = async (req, res) => {
 export const createEmployee = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+    const finalRole = role || "employee";
 
     if (!req.user.company) {
-      return res.status(400).json({ message: "Admin has no company assigned" });
+      return res.status(400).json({ message: "User has no company assigned" });
+    }
+
+    // Permission check
+    if (finalRole === "owner" || (finalRole === "admin" && req.user.role !== "owner")) {
+      return res.status(403).json({ message: "Not authorized to create this role" });
     }
 
     const existing = await User.findOne({ email });

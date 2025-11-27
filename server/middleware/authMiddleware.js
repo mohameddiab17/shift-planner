@@ -22,9 +22,30 @@ export const protect = async (req, res, next) => {
   }
 };
 
+// OWNER ONLY
+export const ownerOnly = (req, res, next) => {
+  if (req.user.role !== "owner")
+    return res.status(403).json({ message: "Owners only" });
+  next();
+};
+
 // ADMIN ONLY
 export const adminOnly = (req, res, next) => {
   if (req.user.role !== "admin")
     return res.status(403).json({ message: "Admins only" });
+  next();
+};
+
+// ADMIN OR OWNER
+export const adminOrAbove = (req, res, next) => {
+  if (!["owner", "admin"].includes(req.user.role))
+    return res.status(403).json({ message: "Admin or above required" });
+  next();
+};
+
+// TEAM LEADER OR ABOVE
+export const teamLeaderOrAbove = (req, res, next) => {
+  if (!["owner", "admin", "team_leader"].includes(req.user.role))
+    return res.status(403).json({ message: "Team leader or above required" });
   next();
 };

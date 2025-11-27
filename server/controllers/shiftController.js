@@ -56,6 +56,13 @@ export const createShift = async (req, res) => {
       }
     }
 
+    // Permission check
+    const isOwnerOrAdmin = req.user.role === 'owner' || req.user.role === 'admin';
+    const isTeamLeader = req.user.role === 'team_leader' && team && team.teamLeader && team.teamLeader.toString() === req.user._id.toString();
+    if (!isOwnerOrAdmin && !isTeamLeader) {
+      return res.status(403).json({ message: "Not authorized to create shifts for this employee" });
+    }
+
     // Overlap check
     const overlapping = await Shift.findOne({
       employee: employeeId,
@@ -103,8 +110,9 @@ export const getTeamShifts = async (req, res) => {
     if (team.company.toString() !== companyId.toString())
       return res.status(403).json({ message: "Not allowed" });
 
-    if (team.admin.toString() !== adminId.toString())
-      return res.status(403).json({ message: "Only team admin can access shifts" });
+    const canAccess = team.admin.toString() === adminId.toString() || (team.teamLeader && team.teamLeader.toString() === adminId.toString());
+    if (!canAccess)
+      return res.status(403).json({ message: "Only team admin or leader can access shifts" });
 
     const query = {
       team: teamId,
@@ -182,10 +190,11 @@ export const updateShift = async (req, res) => {
     if (shift.company.toString() !== companyId.toString())
       return res.status(403).json({ message: "Not allowed" });
 
-    // Ensure admin owns the team
+    // Ensure admin or team leader owns the team
     const team = await Team.findById(shift.team);
-    if (!team || team.admin.toString() !== adminId.toString())
-      return res.status(403).json({ message: "Not allowed" });
+    if (!team) return res.status(403).json({ message: "Shift has no team" });
+    const canManage = team.admin.toString() === adminId.toString() || (team.teamLeader && team.teamLeader.toString() === adminId.toString());
+    if (!canManage) return res.status(403).json({ message: "Not allowed" });
 
     // New employee validation
     let finalEmployee = shift.employee.toString();
@@ -264,8 +273,9 @@ export const deleteShift = async (req, res) => {
       return res.status(403).json({ message: "Not allowed" });
 
     const team = await Team.findById(shift.team);
-    if (!team || team.admin.toString() !== adminId.toString())
-      return res.status(403).json({ message: "Not allowed" });
+    if (!team) return res.status(403).json({ message: "Shift has no team" });
+    const canManage = team.admin.toString() === adminId.toString() || (team.teamLeader && team.teamLeader.toString() === adminId.toString());
+    if (!canManage) return res.status(403).json({ message: "Not allowed" });
 
     await shift.deleteOne();
     return res.json({ message: "Shift deleted" });
