@@ -190,8 +190,8 @@ export const updateShift = async (req, res) => {
 
     // Ensure admin owns the team
     const team = await Team.findById(shift.team);
-    if (!team) return res.status(403).json({ message: "Shift has no team" });
-    if (team.admin.toString() !== adminId.toString()) return res.status(403).json({ message: "Not allowed" });
+    if (!team || team.admin.toString() !== adminId.toString())
+      return res.status(403).json({ message: "Not allowed" });
 
     // New employee validation
     let finalEmployee = shift.employee.toString();

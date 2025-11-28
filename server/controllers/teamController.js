@@ -1,7 +1,7 @@
 import Team from "../models/teamModel.js";
 import User from "../models/userModel.js";
 
-// CREATE TEAM (SUPER ADMIN OR ADMIN)
+// CREATE TEAM (ADMIN ONLY)
 export const createTeam = async (req, res) => {
   const { name } = req.body;
   try {
@@ -111,8 +111,7 @@ export const getMyTeam = async (req, res) => {
       company: req.user.company,
     })
       .populate("members", "name email role")
-      .populate("admin", "name email")
-      .populate("teamLeader", "name email");
+      .populate("admin", "name email");
 
     if (!team)
       return res.status(404).json({ message: "You are not assigned to any team" });

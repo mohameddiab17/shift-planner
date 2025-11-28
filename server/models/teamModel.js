@@ -2,18 +2,21 @@ import mongoose from "mongoose";
 
 const teamSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
+    name: { 
+      type: String, 
+      required: true, 
+      trim: true 
+    },
+
+    // Team belongs to ONE company
     company: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
       required: true,
       index: true,
     },
-    admin: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
+
+    // All members inside the team (employees only)
     members: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -24,7 +27,8 @@ const teamSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-teamSchema.index({ company: 1, name: 1 }, { unique: true }); 
+// Unique team name within the same company
+teamSchema.index({ company: 1, name: 1 }, { unique: true });
 
 const Team = mongoose.model("Team", teamSchema);
 export default Team;
