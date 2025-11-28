@@ -1,5 +1,5 @@
 import express from "express";
-import { protect, adminOnly } from "../middleware/authMiddleware.js";
+import { protect, adminOnly, adminOrAbove } from "../middleware/authMiddleware.js";
 import {
   createTeam,
   addMember,
@@ -9,9 +9,9 @@ import {
 
 const router = express.Router();
 
-router.post("/", protect, adminOnly, createTeam);
-router.post("/add-member", protect, adminOnly, addMember);
-router.get("/my-teams", protect, adminOnly, getMyTeams);
-router.get("/my-team", protect, getMyTeam); 
+router.post("/", protect, adminOrAbove, createTeam);
+router.post("/add-member", protect, adminOrAbove, addMember);
+router.get("/my-teams", protect, adminOrAbove, getMyTeams);
+router.get("/my-team", protect, getMyTeam);
 
 export default router;

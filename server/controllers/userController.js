@@ -20,7 +20,7 @@ export const getUsers = async (req, res) => {
 =======
 export const getUsers = async (req, res) => {
   try {
-    const users = await User.find({ company: req.company }).select("-password");
+    const users = await User.find({ company: req.user.company }).select("-password");
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -54,9 +54,15 @@ export const createEmployee = async (req, res) => {
 export const createEmployee = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+    const finalRole = role || "employee";
 
     if (!req.user.company) {
-      return res.status(400).json({ message: "Admin has no company assigned" });
+      return res.status(400).json({ message: "User has no company assigned" });
+    }
+
+    // Permission check
+    if (finalRole === "super_admin" || (finalRole === "admin" && req.user.role !== "super_admin")) {
+      return res.status(403).json({ message: "Not authorized to create this role" });
     }
 
 >>>>>>> 98c9c9b1d4cdd655f227d2c71da409295e082ee9
