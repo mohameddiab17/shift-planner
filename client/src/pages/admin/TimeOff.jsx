@@ -4,7 +4,8 @@ import { useLoading } from "../../contexts/LoaderContext";
 import { 
   Calendar, Clock, CheckCircle, XCircle, Plus, X, History, Inbox 
 } from "lucide-react";
-
+import {Alert} from "../../utils/alertService.js"
+ 
 export default function TimeOff() {
   const [activeTab, setActiveTab] = useState("incoming");
   
@@ -52,7 +53,7 @@ export default function TimeOff() {
       await leaveService.updateRequestStatus(id, status, note);
       fetchData();
     } catch (err) {
-      alert("Action failed");
+      Alert.error("Action failed");
     } finally {
       hide();
     }
@@ -63,12 +64,12 @@ export default function TimeOff() {
     try {
       show();
       await leaveService.submitRequest(formData);
-      alert("Request sent to Super Admin successfully.");
+      Alert.success("Request sent to Super Admin successfully.");
       setIsModalOpen(false);
       setFormData({ leave_type: "vacation", start_date: "", end_date: "", reason: "" });
       if (activeTab === "my_history") fetchData(); // Refresh if looking at history
     } catch (err) {
-      alert(err.response?.data?.message || "Failed");
+      Alert.error(err.response?.data?.message || "Failed");
     } finally {
       hide();
     }
