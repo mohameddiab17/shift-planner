@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { leaveService } from "../../api/services/admin/leaveService";
 import { useLoading } from "../../contexts/LoaderContext";
 import { 
-  Calendar, Clock, CheckCircle, XCircle, Plus, 
-  User, FileText, AlertCircle, X, History, Inbox 
+  Calendar, Clock, CheckCircle, XCircle, Plus, X, History, Inbox 
 } from "lucide-react";
 
 export default function TimeOff() {
-  const [activeTab, setActiveTab] = useState("incoming"); // incoming | my_history
+  const [activeTab, setActiveTab] = useState("incoming");
   
   // Data States
   const [employeeRequests, setEmployeeRequests] = useState([]);
@@ -22,7 +21,7 @@ export default function TimeOff() {
 
   const { show, hide } = useLoading();
 
-  // 1. Fetch Data based on active tab
+  // Fetch Data based on active tab
   const fetchData = async () => {
     try {
       show();
@@ -44,7 +43,7 @@ export default function TimeOff() {
     fetchData();
   }, [activeTab, statusFilter]);
 
-  // 2. Actions
+  // Actions
   const handleAction = async (id, status) => {
     const note = prompt(status === 'approved' ? "Approval Note:" : "Rejection Reason:");
     if (note === null) return;
