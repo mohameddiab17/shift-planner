@@ -50,7 +50,7 @@ apiClient.interceptors.response.use(
             });
 
             window.dispatchEvent(
-              new CustomEvent("auth-update", { detail: me.data })
+              new CustomEvent("auth-update", { detail: me })
             );
           // eslint-disable-next-line no-unused-vars
           } catch (err) {
