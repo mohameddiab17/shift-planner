@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { User, Download, Funnel, Eye, Clock, Calendar, X, Timer, Coffee } from "lucide-react";
 import { attendanceService } from "../../api/services/admin/attendanceService";
 import { useLoading } from "../../contexts/LoaderContext";
-import toast, { Toaster } from "react-hot-toast";
 import * as XLSX from "xlsx";
+import {Alert} from "../../utils/alertService.js";
 
 export default function TimeTracking() {
 
@@ -25,7 +25,7 @@ export default function TimeTracking() {
       setRecords(res.data.records || []);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load data");
+      Alert.error("Error", "Failed to load attendance data.");
     } finally {
       hide();
     }
@@ -71,7 +71,7 @@ export default function TimeTracking() {
 
   // Actions 
   const handleExport = () => {
-    if (filteredRecords.length === 0) return toast.error("No data to export");
+    if (filteredRecords.length === 0) return Alert.error("No data to export");
     try {
       const data = filteredRecords.map(r => ({
         Name: r.user_id?.name,
@@ -84,8 +84,8 @@ export default function TimeTracking() {
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Attendance");
       XLSX.writeFile(wb, `Attendance_${selectedDate}.xlsx`);
-      toast.success("Exported successfully");
-    } catch (e) { toast.error("Export failed"); }
+      Alert.success("Exported successfully");
+    } catch (e) { Alert.error("Export failed"); }
   };
 
   const handleView = (record) => {
@@ -95,9 +95,7 @@ export default function TimeTracking() {
 
   return (
     <>
-      <Toaster position="top-center" />
-
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-6 dark:text-slate-100">
+      <div className="min-h-screen bg-gray-50 p-6">
         
         {/* --- HEADER --- */}
         <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
