@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { superAdminService } from "../../api/services/superAdminService";
 import { useLoading } from "../../contexts/LoaderContext";
 import { 
   ArrowRightLeft, Building, Search, Briefcase, 
-  Mail, Phone, MapPin, X, Filter, MoreVertical,
-  Edit2, Trash2, Plus, User
+  Mail, Phone, MapPin, X, MoreVertical,
+  Edit2, Trash2, Plus,
 } from "lucide-react";
+import {Alert} from "../../utils/alertService.js"
 
 export default function Employees() {
   const [branches, setBranches] = useState([]);
@@ -70,14 +71,16 @@ export default function Employees() {
 
   // Delete
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure? This will permanently delete the employee.")) return;
+    const confirmREsult = await Alert.confirm("Are you sure? This will permanently delete the employee.")
+    if(!confirmREsult.isConfirmed) return;
+    
     try {
       show();
       await superAdminService.deleteEmployee(id);
-      alert("Employee deleted successfully");
+      Alert.success("Employee deleted successfully");
       fetchEmployees();
     } catch (err) {
-      alert("Failed to delete employee");
+      Alert.error("Failed to delete employee");
     } finally {
       hide();
     }
@@ -90,19 +93,18 @@ export default function Employees() {
       show();
       if (modalType === 'edit') {
         await superAdminService.updateEmployee(formData.id, formData);
-        alert("Employee updated successfully!");
+        Alert.success("Employee updated successfully!");
       } else if (modalType === 'create') {
-        // Ensure branch is selected
         const branchId = formData.branch_admin_id || selectedBranch;
-        if (!branchId) return alert("Please select a branch");
+        if (!branchId) return Alert.warning("Please select a branch");
         
         await superAdminService.createEmployee({ ...formData, branch_admin_id: branchId });
-        alert("Employee created successfully!");
+        Alert.success("Employee created successfully!");
       }
       setModalType(null);
       fetchEmployees();
     } catch (err) {
-      alert(err.response?.data?.message || "Operation failed");
+      Alert.error(err.response?.data?.message || "Operation failed");
     } finally {
       hide();
     }
@@ -119,9 +121,9 @@ export default function Employees() {
       });
       setModalType(null);
       fetchEmployees();
-      alert("Employee transferred successfully!");
+      Alert.success("Employee transferred successfully!");
     } catch (err) {
-      alert(err.response?.data?.message || "Transfer failed");
+      Alert.error(err.response?.data?.message || "Transfer failed");
     } finally {
       hide();
     }
@@ -176,7 +178,7 @@ export default function Employees() {
           <p className="text-slate-500 text-sm mt-1">Full control over employees across all branches.</p>
         </div>
         
-        {/* ✅ New Add Button */}
+        {/* New Add Button */}
         <button 
           onClick={openCreate}
           disabled={!selectedBranch}

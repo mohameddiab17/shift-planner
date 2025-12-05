@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { superAdminService } from "../../api/services/superAdminService";
 import { useLoading } from "../../contexts/LoaderContext";
 import { 
@@ -6,6 +6,7 @@ import {
   MoreVertical, Edit2, Trash2, Power, X,
   ChevronLeft, ChevronRight 
 } from "lucide-react";
+import {Alert} from "../../utils/alertService.js"
 
 export default function Teams() {
   const [branches, setBranches] = useState([]);
@@ -65,17 +66,17 @@ export default function Teams() {
           phone: formData.phone,
           is_active: formData.is_active
         });
-        alert("Branch updated successfully!");
+        Alert.success("Branch updated successfully!");
       } else {
         await superAdminService.createBranchAdmin(formData);
-        alert("Branch created successfully!");
+        Alert.success("Branch created successfully!");
       }
       
       setShowModal(false);
       resetForm();
       fetchBranches();
     } catch (err) {
-      alert(err.response?.data?.message || "Operation failed");
+      Alert.error(err.response?.data?.message || "Operation failed");
     } finally {
       hide();
     }
@@ -83,7 +84,8 @@ export default function Teams() {
 
   // Handle Delete
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure? This will delete the admin and might affect branch data.")) return;
+    const result = await Alert.confirm("Are you sure? This will delete the admin and might affect branch data");
+    if (!result.isConfirmed) return;
     try {
       show();
       await superAdminService.deleteBranch(id);
@@ -92,10 +94,9 @@ export default function Teams() {
       } else {
         fetchBranches();
       }
-      alert("Branch deleted successfully");
-    // eslint-disable-next-line no-unused-vars
+      Alert.success("Branch deleted successfully");
     } catch (err) {
-      alert("Failed to delete branch");
+      Alert.error("Failed to delete branch");
     } finally {
       hide();
     }
@@ -106,10 +107,10 @@ export default function Teams() {
     try {
       show();
       await superAdminService.updateBranch(branch._id, { is_active: !branch.is_active });
+      Alert.success(`Branch ${branch.is_active ? 'deactivated' : 'activated'} successfully`);
       fetchBranches();
-    // eslint-disable-next-line no-unused-vars
     } catch (err) {
-      alert("Failed to update status");
+      Alert.error("Failed to update status");
     } finally {
       hide();
     }

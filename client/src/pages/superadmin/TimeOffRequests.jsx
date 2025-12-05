@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { superAdminService } from "../../api/services/superAdminService";
 import { useLoading } from "../../contexts/LoaderContext";
-import { 
-  CheckCircle, XCircle, Clock, Calendar, 
-  FileText, User, Filter, AlertCircle,
-  ChevronLeft, ChevronRight // ✅ استيراد أيقونات التنقل
+import {
+  CheckCircle, XCircle, Calendar,
+  FileText, User, AlertCircle,
+  ChevronLeft, ChevronRight
 } from "lucide-react";
+import { Alert } from "../../utils/alertService.js";
 
 export default function TimeOffRequests() {
   const [requests, setRequests] = useState([]);
   const [statusFilter, setStatusFilter] = useState("pending");
-  
+
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 6; 
+  const limit = 6;
 
   const { show, hide } = useLoading();
 
@@ -22,7 +23,7 @@ export default function TimeOffRequests() {
       show();
       const res = await superAdminService.getLeaveRequests(statusFilter, page, limit);
       setRequests(res.data.data || []);
-      
+
       if (res.data.pagination) {
         setTotalPages(res.data.pagination.total_pages);
       }
@@ -42,21 +43,24 @@ export default function TimeOffRequests() {
   }, [statusFilter]);
 
   const handleAction = async (requestId, newStatus) => {
-    const note = prompt(
-      newStatus === "approved" 
-        ? "Add approval note (optional):" 
-        : "Reason for rejection (optional):"
-    );
+    const { value: note, isConfirmed } = await Alert.prompt({
+      title: newStatus === "approved" ? "Approval Note" : "Rejection Note",
+      inputLabel: newStatus === "approved"
+        ? "Add approval note (optional):"
+        : "Reason for rejection (optional):",
+      placeholder: "Write here...",
+      required: false
+    });
 
-    if (note === null) return;
+    if (!isConfirmed) return;
 
     try {
       show();
       await superAdminService.updateLeaveStatus(requestId, newStatus, note);
-      alert(`Request ${newStatus} successfully!`);
-      fetchRequests(); 
+      Alert.success(`Request ${newStatus} successfully!`);
+      fetchRequests();
     } catch (err) {
-      alert(err.response?.data?.message || "Action failed");
+      Alert.error(err.response?.data?.message || "Action failed");
     } finally {
       hide();
     }
@@ -72,7 +76,7 @@ export default function TimeOffRequests() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      
+
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
@@ -86,11 +90,10 @@ export default function TimeOffRequests() {
             <button
               key={tab}
               onClick={() => setStatusFilter(tab)}
-              className={`px-4 py-2 text-sm font-medium rounded-lg capitalize transition-all ${
-                statusFilter === tab 
-                  ? "bg-[#112D4E] text-white shadow-sm" 
+              className={`px-4 py-2 text-sm font-medium rounded-lg capitalize transition-all ${statusFilter === tab
+                  ? "bg-[#112D4E] text-white shadow-sm"
                   : "text-slate-600 hover:bg-slate-50"
-              }`}
+                }`}
             >
               {tab}
             </button>
@@ -104,7 +107,7 @@ export default function TimeOffRequests() {
           requests.map((req) => (
             <div key={req._id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition">
               <div className="flex flex-col lg:flex-row justify-between gap-6">
-                
+
                 {/* User Info */}
                 <div className="flex gap-4 items-start min-w-[200px]">
                   <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-lg">
@@ -150,13 +153,13 @@ export default function TimeOffRequests() {
                 {/* Actions */}
                 {req.status === "pending" && (
                   <div className="flex lg:flex-col gap-2 justify-center min-w-[140px]">
-                    <button 
+                    <button
                       onClick={() => handleAction(req._id, "approved")}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition font-medium shadow-sm active:scale-95"
                     >
                       <CheckCircle size={16} /> Approve
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleAction(req._id, "rejected")}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-white text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition font-medium active:scale-95"
                     >
@@ -195,7 +198,7 @@ export default function TimeOffRequests() {
           >
             <ChevronLeft size={20} />
           </button>
-          
+
           <span className="text-sm font-medium text-slate-600">
             Page {page} of {totalPages}
           </span>
