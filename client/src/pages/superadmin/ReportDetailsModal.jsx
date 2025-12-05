@@ -2,6 +2,7 @@ import { X, Calendar, FileSpreadsheet, FileText } from "lucide-react";
 import { jsPDF } from "jspdf"; 
 import autoTable from 'jspdf-autotable'; 
 import * as XLSX from "xlsx";
+import {Alert} from "../../utils/alertService.js"
 
 export default function ReportDetailsModal({ report, onClose }) {
   if (!report) return null;
@@ -94,12 +95,12 @@ export default function ReportDetailsModal({ report, onClose }) {
         });
         doc.save(`${(title || "Report").replace(/\s+/g, '_')}.pdf`);
       } else {
-        alert("No detailed data available to export.");
+        Alert.warning("No detailed data available to export.");
       }
 
     } catch (err) {
       console.error("PDF Export Error:", err);
-      alert("Failed to generate PDF. Check console.");
+      Alert.error("Failed to generate PDF report.");
     }
   };
 

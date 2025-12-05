@@ -5,7 +5,7 @@ import {
   User, Mail, Phone, Shield, Calendar, 
   Clock, Camera, Save
 } from "lucide-react";
-
+import { Alert } from "../utils/alertService.js";
 export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [formData, setFormData] = useState({ name: "", phone: "" });
@@ -40,10 +40,9 @@ export default function Profile() {
       show();
       await authService.updateProfile(formData);
       setProfile({ ...profile, ...formData });
-      alert("Profile updated successfully!");
-    // eslint-disable-next-line no-unused-vars
+      Alert.success("Profile updated successfully!");
     } catch (err) {
-      alert("Failed to update profile");
+      Alert.error("Failed to update profile");
     } finally {
       hide();
     }
@@ -64,10 +63,9 @@ export default function Profile() {
         await authService.updateProfile({ ...formData, avatar: base64Image });
         
         setProfile({ ...profile, avatar: base64Image });
-        
-      // eslint-disable-next-line no-unused-vars
+        Alert.success("Profile image updated successfully!");
       } catch (err) {
-        alert("Failed to upload image. Try a smaller file.");
+        Alert.error("Failed to upload profile image");
       } finally {
         hide();
       }

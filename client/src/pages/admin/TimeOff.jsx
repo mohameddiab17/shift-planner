@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import { leaveService } from "../../api/services/admin/leaveService";
 import { useLoading } from "../../contexts/LoaderContext";
-import { 
-  Calendar, Clock, CheckCircle, XCircle, Plus, X, History, Inbox 
+import {
+  Calendar, Clock, CheckCircle, XCircle, Plus, X, History, Inbox
 } from "lucide-react";
-import {Alert} from "../../utils/alertService.js"
- 
+import { Alert } from "../../utils/alertService.js"
+
 export default function TimeOff() {
   const [activeTab, setActiveTab] = useState("incoming");
-  
+
   // Data States
   const [employeeRequests, setEmployeeRequests] = useState([]);
   const [myRequests, setMyRequests] = useState([]);
   const [statusFilter, setStatusFilter] = useState("pending");
-  
+
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -46,11 +46,18 @@ export default function TimeOff() {
 
   // Actions
   const handleAction = async (id, status) => {
-    const note = prompt(status === 'approved' ? "Approval Note:" : "Rejection Reason:");
+    const { value: note, isConfirmed } = await Alert.prompt({
+      title: status === 'approved' ? "Approval Note" : "Rejection Reason",
+      inputLabel: "Please enter your note:",
+      placeholder: "Type here...",
+      required: true
+    });
+    if (!isConfirmed) return;
     if (note === null) return;
     try {
       show();
       await leaveService.updateRequestStatus(id, status, note);
+      Alert.success(`Request ${status}`);
       fetchData();
     } catch (err) {
       Alert.error("Action failed");
@@ -85,14 +92,14 @@ export default function TimeOff() {
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-slate-950 min-h-screen dark:text-slate-100">
-      
+
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Time Off Management</h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm">Manage team leaves & track your own.</p>
         </div>
-        <button 
+        <button
           onClick={() => setIsModalOpen(true)}
           className="bg-[#112D4E] hover:bg-[#274b74] text-white px-5 py-2.5 rounded-xl flex items-center gap-2 font-medium transition shadow-sm"
         >
@@ -104,21 +111,19 @@ export default function TimeOff() {
       <div className="flex gap-4 mb-6 border-b border-slate-200 dark:border-slate-700">
         <button
           onClick={() => setActiveTab("incoming")}
-          className={`pb-2 px-1 flex items-center gap-2 text-sm font-medium transition ${
-            activeTab === "incoming" 
-              ? "border-b-2 border-[#112D4E] dark:border-blue-500 text-[#112D4E] dark:text-blue-400" 
+          className={`pb-2 px-1 flex items-center gap-2 text-sm font-medium transition ${activeTab === "incoming"
+              ? "border-b-2 border-[#112D4E] dark:border-blue-500 text-[#112D4E] dark:text-blue-400"
               : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-          }`}
+            }`}
         >
           <Inbox size={18} /> Employee Requests
         </button>
         <button
           onClick={() => setActiveTab("my_history")}
-          className={`pb-2 px-1 flex items-center gap-2 text-sm font-medium transition ${
-            activeTab === "my_history" 
-              ? "border-b-2 border-[#112D4E] dark:border-blue-500 text-[#112D4E] dark:text-blue-400" 
+          className={`pb-2 px-1 flex items-center gap-2 text-sm font-medium transition ${activeTab === "my_history"
+              ? "border-b-2 border-[#112D4E] dark:border-blue-500 text-[#112D4E] dark:text-blue-400"
               : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-          }`}
+            }`}
         >
           <History size={18} /> My Requests
         </button>
@@ -132,11 +137,10 @@ export default function TimeOff() {
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition ${
-                  statusFilter === status 
-                    ? "bg-white text-blue-700 shadow-sm border border-blue-100 ring-1 ring-blue-200" 
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition ${statusFilter === status
+                    ? "bg-white text-blue-700 shadow-sm border border-blue-100 ring-1 ring-blue-200"
                     : "text-slate-500 hover:bg-white"
-                }`}
+                  }`}
               >
                 {status}
               </button>
@@ -157,8 +161,8 @@ export default function TimeOff() {
                         {req.status}
                       </span>
                       <div className="flex items-center gap-3 mt-2 text-xs text-slate-500 dark:text-slate-400">
-                        <span className="flex items-center gap-1"><Calendar size={12}/> {new Date(req.start_date).toLocaleDateString()} - {new Date(req.end_date).toLocaleDateString()}</span>
-                        <span className="flex items-center gap-1"><Clock size={12}/> {req.duration_days} Days</span>
+                        <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(req.start_date).toLocaleDateString()} - {new Date(req.end_date).toLocaleDateString()}</span>
+                        <span className="flex items-center gap-1"><Clock size={12} /> {req.duration_days} Days</span>
                       </div>
                       <p className="text-sm text-slate-600 dark:text-slate-300 mt-2 italic">"{req.reason}"</p>
                     </div>
@@ -196,12 +200,12 @@ export default function TimeOff() {
                     </span>
                     <span className="text-sm text-slate-500 dark:text-slate-400 font-medium capitalize">{req.leave_type} Leave</span>
                   </div>
-                  
+
                   <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-300">
-                    <span className="flex items-center gap-1"><Calendar size={14}/> {new Date(req.start_date).toLocaleDateString()} - {new Date(req.end_date).toLocaleDateString()}</span>
-                    <span className="flex items-center gap-1"><Clock size={14}/> {req.duration_days} Days</span>
+                    <span className="flex items-center gap-1"><Calendar size={14} /> {new Date(req.start_date).toLocaleDateString()} - {new Date(req.end_date).toLocaleDateString()}</span>
+                    <span className="flex items-center gap-1"><Clock size={14} /> {req.duration_days} Days</span>
                   </div>
-                  
+
                   <p className="text-sm text-slate-600 dark:text-slate-300 mt-2 bg-slate-50 dark:bg-slate-700 p-3 rounded-lg border border-slate-100 dark:border-slate-600 italic">
                     My Reason: "{req.reason}"
                   </p>
@@ -232,12 +236,12 @@ export default function TimeOff() {
               <h3 className="font-bold text-slate-800 dark:text-slate-100">Submit Leave Request</h3>
               <button onClick={() => setIsModalOpen(false)}><X size={20} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400" /></button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Type</label>
                 <select className="w-full mt-1 p-2.5 border border-slate-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-slate-100"
-                  value={formData.leave_type} onChange={(e) => setFormData({...formData, leave_type: e.target.value})}>
+                  value={formData.leave_type} onChange={(e) => setFormData({ ...formData, leave_type: e.target.value })}>
                   <option value="vacation">Vacation</option>
                   <option value="sick">Sick Leave</option>
                   <option value="personal">Personal</option>
@@ -247,18 +251,18 @@ export default function TimeOff() {
                 <div>
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Start Date</label>
                   <input required type="date" className="w-full mt-1 p-2.5 border border-slate-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-slate-100"
-                    value={formData.start_date} onChange={(e) => setFormData({...formData, start_date: e.target.value})} />
+                    value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">End Date</label>
                   <input required type="date" className="w-full mt-1 p-2.5 border border-slate-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-slate-100"
-                    value={formData.end_date} onChange={(e) => setFormData({...formData, end_date: e.target.value})} />
+                    value={formData.end_date} onChange={(e) => setFormData({ ...formData, end_date: e.target.value })} />
                 </div>
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Reason</label>
                 <textarea required rows="3" className="w-full mt-1 p-2.5 border border-slate-200 dark:border-slate-600 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 resize-none dark:bg-slate-700 dark:text-slate-100"
-                  value={formData.reason} onChange={(e) => setFormData({...formData, reason: e.target.value})}></textarea>
+                  value={formData.reason} onChange={(e) => setFormData({ ...formData, reason: e.target.value })}></textarea>
               </div>
               <button type="submit" className="w-full py-3 bg-[#112D4E] dark:bg-[#1e3a5f] text-white rounded-xl hover:bg-[#274b74] dark:hover:bg-[#2d5080] font-bold transition shadow-md mt-2">Submit Request</button>
             </form>
