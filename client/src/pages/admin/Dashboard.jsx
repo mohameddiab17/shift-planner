@@ -17,6 +17,7 @@ export default function AdminDashboard() {
     loading,
     error,
     refetch,
+    isFetching,
     branch,
     today,
     recentEmployees,
@@ -25,7 +26,7 @@ export default function AdminDashboard() {
     reports,
   } = useAdminDashboard();
 
-  if (loading) return <DashboardSkeleton />;
+  if (loading || isFetching) return <DashboardSkeleton />;
 
   if (error || !branch) {
     return <GlobalError onRetry={refetch} />;

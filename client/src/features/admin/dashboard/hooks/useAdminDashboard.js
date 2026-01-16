@@ -6,6 +6,7 @@ export function useAdminDashboard() {
   const {
     data,
     isLoading: loading,
+    isFetching,
     error,
     refetch
   } = useQuery({
@@ -35,6 +36,7 @@ export function useAdminDashboard() {
 
   return {
     loading,
+    isFetching,
     error: error ? { message: error.message || "Failed to load dashboard data" } : null,
     refetch,
 
